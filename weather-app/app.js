@@ -37,8 +37,12 @@ Goal: Use both destructuring and property shorthand in weather app
 3. Test your work and ensure app still works
 */
 
-if (process.argv[2]) {
-    geocode(process.argv[2], (error, { latitude, longitude, location } = {}) => {
+const address = process.argv[2];
+
+if (!address) {
+    console.log("type a location")
+} else {
+    geocode(address, (error, { latitude, longitude, location } = {}) => {
         if (error) {
             return console.log('error', error);
         }
@@ -50,6 +54,4 @@ if (process.argv[2]) {
             console.log(forecastData);
         })
     });
-} else if (!process.argv[2]) {
-    console.log("type a location")
 }

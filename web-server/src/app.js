@@ -1,6 +1,10 @@
 const path = require('path');
 const express = require('express');
 const hbs = require('hbs');
+const geocode = require('./utils/geocode');
+const forecast = require('./utils/forecast');
+const request = require('postman-request');
+
 
 const app = express();
 
@@ -40,10 +44,35 @@ app.get('/help', (req, res) => {
 })
 
 app.get('/weather', (req, res) => {
-    res.send({
-        forecast: 'It is raining!',
-        location: 'julis'
+    if (!req.query.address) {
+        return res.send({
+            error: 'You must provide an address'
+        })
+    };
+
+    geocode(req.query.address, (error, { latitude, longitude, location } = {}) => {
+        if (error) {
+            return res.send({ error })
+        }
+
+        forecast(latitude, longitude, (error, forecastData) => {
+            if (error) {
+                return res.send({ error })
+            }
+
+            res.send({
+                forecast: forecastData,
+                location,
+                address: req.query.address,
+            })
+        })
     })
+
+    // res.send({
+    //     forecast: 'It is raining!',
+    //     location: 'julis',
+    //     address: req.query.address
+    // })
 })
 
 app.get('/help/*', (req, res) => {
@@ -100,4 +129,18 @@ Goal: Create and render a 404 page with handlebars
     - Page not found.
     - Help article not found.
 4. Test your work. Visit /what and /help/units
+
+Lecture 54, 12:30
+Goal: Update weather endpoint to accept address
+1. No address? Send back an error
+2. Address? Send back the static JSON
+    - add address property onto JSON which returns the peovided address
+3. Test /weather and /weather?address=philadelphia
+
+Lecture 55, 3:30
+Goal: Wire up /weather
+1. Require geocode/forecast into app.js
+2. Use the address to geocode
+3. Use the coordinates to get forecast
+4. Send back the real forecast and location
 */
